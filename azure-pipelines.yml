@@ -13,6 +13,7 @@ jobs:
 - job: Build
   pool:
     name: 'OnPremAgentPool'
+    demands: Agent.Name -equals pip-300
   steps:
   - script: |
       # Display agent capabilities for troubleshooting
@@ -30,5 +31,3 @@ jobs:
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
       goals: 'package'
   displayName: 'Build on pip-300 agent'
-  demands:
-    - Agent.Name -equals pip-300

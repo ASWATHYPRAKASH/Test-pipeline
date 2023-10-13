@@ -2,7 +2,6 @@
 # Build your Java project and run tests with Apache Maven.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
-
 trigger:
 - master
 
@@ -14,10 +13,24 @@ jobs:
   pool:
     name: 'OnPremAgentPool'
   steps:
-  - task: UseJavaVersion@0
-    inputs:
-      version: '8'  # Specify the desired JDK version
-      installationPath: $(Agent.ToolsDirectory)/java
+  - script: |
+      # Download and install JDK 8
+      JDK_URL="https://example.com/path/to/jdk8.tar.gz"  # Replace with the actual URL
+      INSTALL_DIR="/opt/jdk8"  # Replace with the desired installation directory
+      
+      # Create the installation directory
+      sudo mkdir -p $INSTALL_DIR
+      
+      # Download and extract JDK 8
+      sudo curl -L $JDK_URL | sudo tar xz -C $INSTALL_DIR --strip-components=1
+      
+      # Set JAVA_HOME environment variable
+      echo "export JAVA_HOME=$INSTALL_DIR" | sudo tee -a /etc/environment
+      source /etc/environment
+      
+      # Verify the installation
+      java -version
+    displayName: 'Install JDK 8'
 
 - job: Build
   pool:
@@ -34,7 +47,8 @@ jobs:
       mavenPomFile: 'pom.xml'
       mavenOptions: '-Xmx3072m'
       javaHomeOption: 'JDKVersion'
-      jdkVersionOption: 'default'  # Use the default JDK version installed by the "UseJavaVersion" task
+      jdkVersionOption: '1.8'
+      jdkArchitectureOption: 'x64'
       publishJUnitResults: true
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
       goals: 'package'

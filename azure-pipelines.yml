@@ -10,10 +10,19 @@ pool:
   name: 'OnPremAgentPool'
 
 jobs:
+- job: InstallJDK
+  pool:
+    name: 'OnPremAgentPool'
+  steps:
+  - task: UseJavaVersion@0
+    inputs:
+      version: '8'  # Specify the desired JDK version
+      installationPath: $(Agent.ToolsDirectory)/java
+
 - job: Build
   pool:
     name: 'OnPremAgentPool'
-    demands: Agent.Name -equals pip-300
+    dependsOn: InstallJDK
   steps:
   - script: |
       # Display agent capabilities for troubleshooting
@@ -25,8 +34,7 @@ jobs:
       mavenPomFile: 'pom.xml'
       mavenOptions: '-Xmx3072m'
       javaHomeOption: 'JDKVersion'
-      jdkVersionOption: '1.8'
-      jdkArchitectureOption: 'x64'
+      jdkVersionOption: 'default'  # Use the default JDK version installed by the "UseJavaVersion" task
       publishJUnitResults: true
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
       goals: 'package'
